@@ -15,7 +15,7 @@ cors.init_app(app, resources={r"/*": {"origins": "http://localhost:8080"}})
 class User(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     username = db.Column(db.String(50), index = True, unique = True)
-    messages = db.relationship('Message', backref='user', lazy='dynamic')
+    password = db.Column(db.String(50), index = True, unique = False) 
 
     def __repr__(self):
         return "{}".format(self.username)
@@ -34,6 +34,7 @@ db.create_all()
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
+
 @app.route("/", methods=["GET"])
 def home():
     messages = Message.query.all()
@@ -45,3 +46,10 @@ def home():
 def message():
     message = Message.query.first()
     return str(message.id)
+
+
+@app.route("/login/<username>/<password>", methods=["POST"])
+def login(username, password):
+    user = User.query.filter_by(username = username, password = password).first()
+    if user:
+        return user.username
